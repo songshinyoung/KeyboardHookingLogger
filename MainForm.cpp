@@ -1,6 +1,9 @@
 //---------------------------------------------------------------------------
 
 #include <vcl.h>
+#include <System.Classes.hpp>
+#include <algorithm>
+
 #pragma hdrstop
 #include <Windows.h>
 
@@ -33,6 +36,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 				// ShowMessage(L"F1 키가 눌렸습니다!");
 			}
 
+			// 스켄 코드가 다른 키와 동일한 특수 키들은 flags또는 vkcode를 비교하여 임의의 scancode 값을 부여해 준다.
 			if(pKbdLLHook->scanCode == 0x52 && pKbdLLHook->flags == 1) { // Ins
 				nScanCode = 12 * 8 + 0;
 			}
@@ -93,6 +97,8 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 				Form1->m_nScanCodeCound[nScanCode] += 1;
 				Form1->m_bNewEvent = true;
 				Form1->m_bScanCodeInput[nScanCode] = true;
+
+				Form1->UpdateKeyData(nScanCode, pKbdLLHook->vkCode, 1);
 			}
 
 
@@ -153,6 +159,43 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::FormShow(TObject *Sender)
 {
+	//------------------------------------------------------
+	// create Key Nama table.
+	DWORD   scancode = 0;
+	wchar_t buffer[16];
+
+	for(int row=0; row<32; row++) {
+		for(int col=0; col<16; col += 2) {
+			scancode = (row * 8) + (col / 2) ;
+			ZeroMemory(buffer, sizeof(buffer));
+			GetKeyNameTextW(scancode << 16, buffer, 16);
+			m_sKeyName[scancode] = buffer;
+		}
+	}
+
+	// 특수 키 들..
+	// 스켄 코드가 다른 키와 동일한 특수 키들은 flags또는 vkcode를 비교하여 임의의 scancode 값을 부여해 준다.
+	scancode = 12 * 8 + 0;  m_sKeyName[scancode] = "Ins";
+	scancode = 12 * 8 + 1;  m_sKeyName[scancode] = "Home";
+	scancode = 12 * 8 + 2;  m_sKeyName[scancode] = "Del";
+	scancode = 12 * 8 + 3;  m_sKeyName[scancode] = "End";
+	scancode = 12 * 8 + 4;  m_sKeyName[scancode] = "PgUp";
+	scancode = 12 * 8 + 5;  m_sKeyName[scancode] = "PgDn";
+	scancode = 12 * 8 + 6;  m_sKeyName[scancode] = "Num";
+	scancode = 12 * 8 + 7;  m_sKeyName[scancode] = "PrtSc";
+	scancode = 13 * 8 + 0;  m_sKeyName[scancode] = "Num /";
+	scancode = 13 * 8 + 1;  m_sKeyName[scancode] = "Num Enter";
+	scancode = 13 * 8 + 2;  m_sKeyName[scancode] = "Vol -";
+	scancode = 13 * 8 + 3;  m_sKeyName[scancode] = "Vol +";
+	scancode = 13 * 8 + 4;  m_sKeyName[scancode] = "Vol X";
+	scancode = 13 * 8 + 5;  m_sKeyName[scancode] = "VCal.";
+	scancode = 14 * 8 + 0;  m_sKeyName[scancode] = "Up";
+	scancode = 14 * 8 + 1;  m_sKeyName[scancode] = "Left";
+	scancode = 14 * 8 + 2;  m_sKeyName[scancode] = "Right";
+	scancode = 14 * 8 + 3;  m_sKeyName[scancode] = "Down";
+	//------------------------------------------------------
+
+
 	DrawScanCodeName(0);
 }
 //---------------------------------------------------------------------------
@@ -167,14 +210,13 @@ void __fastcall TForm1::FormDestroy(TObject *Sender)
 		RemoveHook();
 		m_bHookStarted = false;
 	}
+
+
+	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
+		delete *it;
+	}
 }
 //---------------------------------------------------------------------------
-
-
-
-
-
-
 
 
 
@@ -271,35 +313,9 @@ void __fastcall TForm1::DrawScanCodeName(int nDisplayType)
 			for(int row=0; row<32; row++) {
 				for(int col=0; col<16; col += 2) {
 					scancode = (row * 8) + (col / 2) ;
-					ZeroMemory(buffer, sizeof(buffer));
-
-					GetKeyNameTextW(scancode << 16, buffer, 16);
-
-					StringGrid1->Cells[col][row] = buffer;
+					StringGrid1->Cells[col][row] = m_sKeyName[scancode];
 				}
 			}
-
-			// 특수 키 들..
-			StringGrid1->Cells[0][12] 	= "Ins";
-			StringGrid1->Cells[2][12] 	= "Home";
-			StringGrid1->Cells[4][12] 	= "Del";
-			StringGrid1->Cells[6][12] 	= "End";
-			StringGrid1->Cells[8][12] 	= "PgUp";
-			StringGrid1->Cells[10][12] 	= "PgDn";
-			StringGrid1->Cells[12][12] 	= "Num";
-			StringGrid1->Cells[14][12] 	= "PrtSc";
-
-			StringGrid1->Cells[0][13] 	= "Num /";
-			StringGrid1->Cells[2][13] 	= "Num Enter";
-			StringGrid1->Cells[4][13] 	= "Vol -";
-			StringGrid1->Cells[6][13] 	= "Vol +";
-			StringGrid1->Cells[8][13] 	= "Vol X";
-			StringGrid1->Cells[10][13] 	= "Cal.";
-
-			StringGrid1->Cells[0][14] 	= "Up";
-			StringGrid1->Cells[2][14] 	= "Left";
-			StringGrid1->Cells[4][14] 	= "Right";
-			StringGrid1->Cells[6][14] 	= "Down";
 			break;
 
 		case 1:
@@ -339,6 +355,26 @@ void __fastcall TForm1::DrawScanCodeCount()
 
 	StringGrid1->Enabled = true;
 
+
+	//------------------------------------------
+	// Sort display
+	StringGrid_Sort->Enabled = false;
+
+	StringGrid_Sort->Cells[0][0] = "Key Name";
+	StringGrid_Sort->Cells[1][0] = "Click count";
+
+	int   idx = 0;
+	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
+		scancode = (*it)->ScanCode;
+		StringGrid_Sort->Cells[0][idx+1] = m_sKeyName[scancode];
+		StringGrid_Sort->Cells[1][idx+1] = (*it)->Count;
+		idx += 1;
+	}
+
+
+	StringGrid_Sort->Enabled = true;
+
+
 }
 //---------------------------------------------------------------------------
 
@@ -359,7 +395,7 @@ void __fastcall TForm1::StringGrid1DrawCell(TObject *Sender, int ACol, int ARow,
 	if((ACol % 2) == 0) {
 		// Scan Code Name.
 
-		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 10, true, true);
+		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 8, true, true);
 
 	}
 	else {
@@ -387,7 +423,7 @@ void __fastcall TForm1::StringGrid1DrawCell(TObject *Sender, int ACol, int ARow,
 			}
 		}
 
-		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 10, true, bTextBold);
+		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 8, true, bTextBold);
 	}
 }
 //---------------------------------------------------------------------------
@@ -443,5 +479,82 @@ void __fastcall TForm1::StringGridSubCodeView(TObject *Sender, int ACol, int ARo
     pSG->Canvas->Font->Color = clOrgFontColor;
     pSG->Canvas->Font->Style = OrgFontStyle;
 }
+//---------------------------------------------------------------------------
 
+void __fastcall TForm1::UpdateKeyData(DWORD scancode, DWORD vkcode, DWORD count)
+{
+
+	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
+		if((*it)->ScanCode == scancode) {
+			(*it)->Count += count;
+			(*it)->VKCode = vkcode;
+
+			SortKeyData();
+
+			return;
+		}
+	}
+
+	m_DataList.push_back(new TKeyCountData(scancode, vkcode, count));
+	SortKeyData();
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::UpdateKeyData(DWORD scancode)
+{
+	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
+		if((*it)->ScanCode == scancode) {
+			(*it)->Count += 1;
+
+			SortKeyData();
+
+			return;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+bool CompareCount(TKeyCountData *a, TKeyCountData *b)
+{
+  	return a->Count > b->Count;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SortKeyData()
+{
+	m_DataList.sort(CompareCount);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::StringGrid_SortDrawCell(TObject *Sender, int ACol, int ARow,
+          TRect &Rect, TGridDrawState State)
+{
+	if(ACol < 0) return;
+	if(ARow < 0) return;
+	if(ACol >= StringGrid_Sort->ColCount) return;
+	if(ARow >= StringGrid_Sort->RowCount) return;
+
+	TColor cBackGround = clBtnFace;
+    TColor cFontColor  = clBlack;
+
+	Rect.Left -= 4;
+
+	if(ACol == 0 || ARow == 0) {
+		// Scan Code Name.
+
+		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 8, true, true);
+
+	}
+	else {
+		// Scan Count.
+
+		bool bTextBold = true;
+
+		cBackGround = clWhite;
+		cFontColor  = clBlack;
+		bTextBold   = true;
+
+
+		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 8, true, bTextBold);
+	}
+}
+//---------------------------------------------------------------------------
 

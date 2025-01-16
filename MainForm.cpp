@@ -212,14 +212,26 @@ void __fastcall TForm1::FormDestroy(TObject *Sender)
 	}
 
 
+	Clear();
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Clear()
+{
+
+	ZeroMemory(m_nScanCodeCound, sizeof(m_nScanCodeCound));
+	ZeroMemory(m_bScanCodeInput, sizeof(m_bScanCodeInput));
+
+
 	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
 		delete *it;
 	}
+
+	m_DataList.clear();
+
+	Memo1->Lines->Clear();
 }
+
 //---------------------------------------------------------------------------
-
-
-
 void __fastcall TForm1::Exit1Click(TObject *Sender)
 {
 	Close();
@@ -284,6 +296,20 @@ void __fastcall TForm1::KeyName1Click(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::Clear1Click(TObject *Sender)
+{
+	int nRet = MessageBox(Handle, L"Are you sure you want to delete all values?", L"Warning", MB_ICONQUESTION|MB_YESNO);
+
+	if(nRet != mrYes) return;
+
+
+	Clear();
+
+	DrawScanCodeCount(true);
+
+}
+//---------------------------------------------------------------------------
+
 void __fastcall TForm1::Timer1Timer(TObject *Sender)
 {
 	if(m_bNewEvent) {
@@ -337,7 +363,7 @@ void __fastcall TForm1::DrawScanCodeName(int nDisplayType)
 
 }
 //---------------------------------------------------------------------------
-void __fastcall TForm1::DrawScanCodeCount()
+void __fastcall TForm1::DrawScanCodeCount(bool bClear)
 {
 	DWORD  scancode = 0;
 
@@ -362,6 +388,13 @@ void __fastcall TForm1::DrawScanCodeCount()
 
 	StringGrid_Sort->Cells[0][0] = "Key Name";
 	StringGrid_Sort->Cells[1][0] = "Click count";
+
+	if(bClear) {
+		for(int i=0; i<StringGrid_Sort->RowCount; i++) {
+			StringGrid_Sort->Cells[0][i+1] = "";
+			StringGrid_Sort->Cells[1][i+1] = "";
+		}
+	}
 
 	int   idx = 0;
 	for(std::list<TKeyCountData *>::iterator it = m_DataList.begin(); it !=  m_DataList.end(); ++it) {
@@ -413,8 +446,8 @@ void __fastcall TForm1::StringGrid1DrawCell(TObject *Sender, int ACol, int ARow,
 		else {
 			if(m_bScanCodeInput[nScanCode]) {
 				m_bScanCodeInput[nScanCode] = false;
-				cFontColor  = clWhite;
-				cBackGround = clRed;
+				cFontColor  = clBlack;
+				cBackGround = clAqua;
 				bTextBold   = true;
 			}
 			else {

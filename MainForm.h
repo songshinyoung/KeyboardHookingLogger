@@ -47,6 +47,8 @@ __published:	// IDE-managed Components
 	TStringGrid *StringGrid1;
 	TMemo *Memo1;
 	TStringGrid *StringGrid_Sort;
+	TMenuItem *Edit1;
+	TMenuItem *Clear1;
 	void __fastcall Exit1Click(TObject *Sender);
 	void __fastcall HookStart1Click(TObject *Sender);
 	void __fastcall HookStop1Click(TObject *Sender);
@@ -60,12 +62,15 @@ __published:	// IDE-managed Components
 	void __fastcall KeyName1Click(TObject *Sender);
 	void __fastcall StringGrid_SortDrawCell(TObject *Sender, int ACol, int ARow, TRect &Rect,
           TGridDrawState State);
+	void __fastcall Clear1Click(TObject *Sender);
 private:	// User declarations
 	bool	m_bHookStarted;
 	std::list<TKeyCountData *> m_DataList;
 
+	void __fastcall Clear();
+
 	void __fastcall DrawScanCodeName(int nDisplayType);  // 0 : Text Key Name, 1 : Key Scan Code.
-	void __fastcall DrawScanCodeCount();
+	void __fastcall DrawScanCodeCount(bool bClear = false);
 
 	void __fastcall StringGridSubCodeView(TObject *Sender, int ACol, int ARow, TRect &Rect,
 			  TColor clBackColor,

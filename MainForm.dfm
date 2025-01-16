@@ -30,7 +30,6 @@ object Form1: TForm1
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 1164
     object Panel_HookStarted: TPanel
       AlignWithMargins = True
       Left = 3
@@ -71,8 +70,6 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       OnDrawCell = StringGrid_SortDrawCell
-      ExplicitLeft = 3
-      ExplicitTop = -6
       RowHeights = (
         24
         24
@@ -342,10 +339,6 @@ object Form1: TForm1
     Caption = 'Panel3'
     ShowCaption = False
     TabOrder = 2
-    ExplicitLeft = -79
-    ExplicitTop = 51
-    ExplicitWidth = 976
-    ExplicitHeight = 637
     object StringGrid1: TStringGrid
       AlignWithMargins = True
       Left = 3
@@ -366,7 +359,6 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       OnDrawCell = StringGrid1DrawCell
-      ExplicitWidth = 981
     end
     object Memo1: TMemo
       Left = 0
@@ -383,7 +375,6 @@ object Form1: TForm1
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 1
-      ExplicitWidth = 1164
     end
   end
   object MainMenu1: TMainMenu
@@ -394,6 +385,13 @@ object Form1: TForm1
       object Exit1: TMenuItem
         Caption = 'Exit'
         OnClick = Exit1Click
+      end
+    end
+    object Edit1: TMenuItem
+      Caption = 'Edit'
+      object Clear1: TMenuItem
+        Caption = 'Clear'
+        OnClick = Clear1Click
       end
     end
     object Run1: TMenuItem

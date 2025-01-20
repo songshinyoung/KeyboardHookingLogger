@@ -1,9 +1,10 @@
 object Form1: TForm1
   Left = 0
   Top = 0
+  BorderStyle = bsSingle
   Caption = 'Keyboard Hooking Logger'
-  ClientHeight = 670
-  ClientWidth = 1172
+  ClientHeight = 751
+  ClientWidth = 1182
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -17,19 +18,22 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnResize = FormResize
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
-    Top = 646
-    Width = 1172
+    Top = 727
+    Width = 1182
     Height = 24
     Align = alBottom
     BevelOuter = bvNone
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 0
+    ExplicitTop = 646
+    ExplicitWidth = 1172
     object Panel_HookStarted: TPanel
       AlignWithMargins = True
       Left = 3
@@ -45,20 +49,22 @@ object Form1: TForm1
     end
   end
   object Panel2: TPanel
-    Left = 1008
+    Left = 1018
     Top = 0
     Width = 164
-    Height = 646
+    Height = 727
     Align = alRight
     BevelOuter = bvNone
     Caption = 'Panel2'
     ShowCaption = False
     TabOrder = 1
+    ExplicitLeft = 1008
+    ExplicitHeight = 646
     object StringGrid_Sort: TStringGrid
       Left = 0
       Top = 0
       Width = 164
-      Height = 646
+      Height = 727
       Align = alClient
       ColCount = 2
       RowCount = 256
@@ -70,6 +76,7 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       OnDrawCell = StringGrid_SortDrawCell
+      ExplicitHeight = 646
       RowHeights = (
         24
         24
@@ -332,18 +339,20 @@ object Form1: TForm1
   object Panel3: TPanel
     Left = 0
     Top = 0
-    Width = 1008
-    Height = 646
+    Width = 1018
+    Height = 727
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Panel3'
     ShowCaption = False
     TabOrder = 2
+    ExplicitWidth = 1008
+    ExplicitHeight = 646
     object StringGrid1: TStringGrid
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 1002
+      Width = 1012
       Height = 529
       Align = alTop
       ColCount = 16
@@ -359,22 +368,25 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       OnDrawCell = StringGrid1DrawCell
+      ExplicitWidth = 1002
     end
     object Memo1: TMemo
       Left = 0
       Top = 535
-      Width = 1008
-      Height = 111
+      Width = 1018
+      Height = 192
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -13
       Font.Name = 'D2Coding'
       Font.Style = []
       ParentFont = False
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 1
+      ExplicitWidth = 1008
+      ExplicitHeight = 111
     end
   end
   object MainMenu1: TMainMenu

@@ -18,94 +18,136 @@ TForm1 *Form1;
 //---------------------------------------------------------------------------
 HHOOK hHook;
 
+
+DWORD GetMyScanCode(KBDLLHOOKSTRUCT *pKbdLLHook)
+{
+	if(pKbdLLHook == NULL) return 0;
+
+	DWORD nScanCode = pKbdLLHook->scanCode;
+
+	// GetKeyNameTextW(nScanCode << 16, buffer, 16);
+
+	// 특정 키 검사 (예: F1 키)
+	if (GetAsyncKeyState(VK_F1) & 0x8000) {
+		// ShowMessage(L"F1 키가 눌렸습니다!");
+	}
+
+	// 스켄 코드가 다른 키와 동일한 특수 키들은 flags또는 vkcode를 비교하여 임의의 scancode 값을 부여해 준다.
+	if(pKbdLLHook->scanCode == 0x58 && pKbdLLHook->flags == 1) { // Win
+		nScanCode = 11 * 8 + 3;
+	}
+	else if(pKbdLLHook->scanCode == 0x50 && pKbdLLHook->flags == 1) { // Super
+		nScanCode = 11 * 8 + 5;
+	}
+	else if(pKbdLLHook->scanCode == 0x52 && pKbdLLHook->flags == 1) { // Ins
+		nScanCode = 12 * 8 + 0;
+	}
+	else if(pKbdLLHook->scanCode == 0x47 && pKbdLLHook->flags == 1) { // Home
+		nScanCode = 12 * 8 + 1;
+	}
+	else if(pKbdLLHook->scanCode == 0x53 && pKbdLLHook->flags == 1) { // Del
+		nScanCode = 12 * 8 + 2;
+	}
+	else if(pKbdLLHook->scanCode == 0x4F && pKbdLLHook->flags == 1) { // End
+		nScanCode = 12 * 8 + 3;
+	}
+	else if(pKbdLLHook->scanCode == 0x49 && pKbdLLHook->flags == 1) { // PgUp
+		nScanCode = 12 * 8 + 4;
+	}
+	else if(pKbdLLHook->scanCode == 0x51 && pKbdLLHook->flags == 1) { // PgDn
+		nScanCode = 12 * 8 + 5;
+	}
+	else if(pKbdLLHook->scanCode == 0x45 && pKbdLLHook->flags == 1) { // Num
+		nScanCode = 12 * 8 + 6;
+	}
+	else if(pKbdLLHook->scanCode == 0x37 && pKbdLLHook->flags == 1) { // PrtSc
+		nScanCode = 12 * 8 + 7;
+	}
+	else if(pKbdLLHook->scanCode == 0x35 && pKbdLLHook->flags == 1) { // Num /
+		nScanCode = 13 * 8 + 0;
+	}
+	else if(pKbdLLHook->scanCode == 0x1C && pKbdLLHook->flags == 1) { // Num Enter
+		nScanCode = 13 * 8 + 1;
+	}
+	else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAE) { // Vol -
+		nScanCode = 13 * 8 + 2;
+	}
+	else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAF) { // Vol +
+		nScanCode = 13 * 8 + 3;
+	}
+	else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAD) { // Vol X
+		nScanCode = 13 * 8 + 4;
+	}
+	else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xB7) { // VCal.
+		nScanCode = 13 * 8 + 5;
+	}
+	else if(pKbdLLHook->scanCode == 0x48 && pKbdLLHook->vkCode == 0x26 && pKbdLLHook->flags == 1) { // Up
+		nScanCode = 14 * 8 + 0;
+	}
+	else if(pKbdLLHook->scanCode == 0x4B && pKbdLLHook->vkCode == 0x25 && pKbdLLHook->flags == 1) { // Left
+		nScanCode = 14 * 8 + 1;
+	}
+	else if(pKbdLLHook->scanCode == 0x4D && pKbdLLHook->vkCode == 0x27 && pKbdLLHook->flags == 1) { // Right
+		nScanCode = 14 * 8 + 2;
+	}
+	else if(pKbdLLHook->scanCode == 0x50 && pKbdLLHook->vkCode == 0x28 && pKbdLLHook->flags == 1) { // Down
+		nScanCode = 14 * 8 + 3;
+	}
+
+	return nScanCode;
+}
+
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION)
     {
-        if (wParam == WM_KEYDOWN)
-        {
-            KBDLLHOOKSTRUCT *pKbdLLHook = (KBDLLHOOKSTRUCT *)lParam;
-			wchar_t buffer[16];
-			DWORD nScanCode = pKbdLLHook->scanCode;
+		switch (wParam)
+		{
+			case WM_KEYLAST:
+				// Form1->Memo1->Lines->Add("WM_KEYLAST");
+				break;
 
-			GetKeyNameTextW(nScanCode << 16, buffer, 16);
+			case WM_KEYDOWN:
+				{
+					KBDLLHOOKSTRUCT *pKbdLLHook = (KBDLLHOOKSTRUCT *)lParam;
+					wchar_t buffer[16];
 
+					DWORD nScanCode = GetMyScanCode(pKbdLLHook);
 
-			// 특정 키 검사 (예: F1 키)
-			if (GetAsyncKeyState(VK_F1) & 0x8000) {
-				// ShowMessage(L"F1 키가 눌렸습니다!");
-			}
+					if((nScanCode >=0)
+					&& (pKbdLLHook->scanCode < ARRAYSIZE(Form1->m_nScanCodeCound))
+					&& (Form1->m_bScanCodeDown[nScanCode] != true)) {
+						Form1->m_nScanCodeCound[nScanCode] += 1;
+						Form1->m_bNewEvent = true;
+						Form1->m_bScanCodeInput[nScanCode] = true;
 
-			// 스켄 코드가 다른 키와 동일한 특수 키들은 flags또는 vkcode를 비교하여 임의의 scancode 값을 부여해 준다.
-			if(pKbdLLHook->scanCode == 0x52 && pKbdLLHook->flags == 1) { // Ins
-				nScanCode = 12 * 8 + 0;
-			}
-			else if(pKbdLLHook->scanCode == 0x47 && pKbdLLHook->flags == 1) { // Home
-				nScanCode = 12 * 8 + 1;
-			}
-			else if(pKbdLLHook->scanCode == 0x53 && pKbdLLHook->flags == 1) { // Del
-				nScanCode = 12 * 8 + 2;
-			}
-			else if(pKbdLLHook->scanCode == 0x4F && pKbdLLHook->flags == 1) { // End
-				nScanCode = 12 * 8 + 3;
-			}
-			else if(pKbdLLHook->scanCode == 0x49 && pKbdLLHook->flags == 1) { // PgUp
-				nScanCode = 12 * 8 + 4;
-			}
-			else if(pKbdLLHook->scanCode == 0x51 && pKbdLLHook->flags == 1) { // PgDn
-				nScanCode = 12 * 8 + 5;
-			}
-			else if(pKbdLLHook->scanCode == 0x45 && pKbdLLHook->flags == 1) { // Num
-				nScanCode = 12 * 8 + 6;
-			}
-			else if(pKbdLLHook->scanCode == 0x37 && pKbdLLHook->flags == 1) { // PrtSc
-				nScanCode = 12 * 8 + 7;
-			}
-			else if(pKbdLLHook->scanCode == 0x35 && pKbdLLHook->flags == 1) { // Num /
-				nScanCode = 13 * 8 + 0;
-			}
-			else if(pKbdLLHook->scanCode == 0x1C && pKbdLLHook->flags == 1) { // Num Enter
-				nScanCode = 13 * 8 + 1;
-			}
-			else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAE) { // Vol -
-				nScanCode = 13 * 8 + 2;
-			}
-			else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAF) { // Vol +
-				nScanCode = 13 * 8 + 3;
-			}
-			else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xAD) { // Vol X
-				nScanCode = 13 * 8 + 4;
-			}
-			else if(pKbdLLHook->scanCode == 0 && pKbdLLHook->vkCode == 0xB7) { // VCal.
-				nScanCode = 13 * 8 + 5;
-			}
-			else if(pKbdLLHook->scanCode == 0x48 && pKbdLLHook->vkCode == 0x26 && pKbdLLHook->flags == 1) { // Up
-				nScanCode = 14 * 8 + 0;
-			}
-			else if(pKbdLLHook->scanCode == 0x4B && pKbdLLHook->vkCode == 0x25 && pKbdLLHook->flags == 1) { // Left
-				nScanCode = 14 * 8 + 1;
-			}
-			else if(pKbdLLHook->scanCode == 0x4D && pKbdLLHook->vkCode == 0x27 && pKbdLLHook->flags == 1) { // Right
-				nScanCode = 14 * 8 + 2;
-			}
-			else if(pKbdLLHook->scanCode == 0x50 && pKbdLLHook->vkCode == 0x28 && pKbdLLHook->flags == 1) { // Down
-				nScanCode = 14 * 8 + 3;
-			}
+						Form1->UpdateKeyData(nScanCode, pKbdLLHook->vkCode, 1);
 
-			if((nScanCode >=0)
-			&& (pKbdLLHook->scanCode < ARRAYSIZE(Form1->m_nScanCodeCound))) {
-				Form1->m_nScanCodeCound[nScanCode] += 1;
-				Form1->m_bNewEvent = true;
-				Form1->m_bScanCodeInput[nScanCode] = true;
+						Form1->m_bScanCodeDown[nScanCode] = true;
+					}
 
-				Form1->UpdateKeyData(nScanCode, pKbdLLHook->vkCode, 1);
-			}
+					String sMsg;
+					sMsg.printf(L"Key Name : %-16s,  VK_Code : 0x%02X,  Scan Code : 0x%02X,  Flags : %d,  Time : %d",
+								Form1->m_sKeyName[nScanCode].c_str(), pKbdLLHook->vkCode, pKbdLLHook->scanCode, pKbdLLHook->flags, pKbdLLHook->time);
 
+					Form1->Memo1->Lines->Add(sMsg);
+				}
+				break;
 
-			String sMsg;
-			sMsg.printf(L"Key Name : %-16s, VK_Code : 0x%X, Scan Code : 0x%X, Flags : %d, Time : %d", buffer, pKbdLLHook->vkCode, pKbdLLHook->scanCode, pKbdLLHook->flags, pKbdLLHook->time);
+			case WM_KEYUP:
+				{
+					// Form1->Memo1->Lines->Add("WM_KEYUP");
 
-			Form1->Memo1->Lines->Add(sMsg);
+					KBDLLHOOKSTRUCT *pKbdLLHook = (KBDLLHOOKSTRUCT *)lParam;
+
+					DWORD nScanCode = GetMyScanCode(pKbdLLHook);
+
+					if((nScanCode >=0)
+					&& (pKbdLLHook->scanCode < ARRAYSIZE(Form1->m_nScanCodeCound))) {
+						Form1->m_bScanCodeDown[nScanCode] = false;
+					}
+				}
+				break;
 		}
 	}
     return CallNextHookEx(hHook, nCode, wParam, lParam);
@@ -149,6 +191,8 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	m_bNewEvent		= false;
 	ZeroMemory(m_nScanCodeCound, sizeof(m_nScanCodeCound));
 	ZeroMemory(m_bScanCodeInput, sizeof(m_bScanCodeInput));
+	ZeroMemory(m_bScanCodeDown,  sizeof(m_bScanCodeDown));
+
 }
 
 //---------------------------------------------------------------------------
@@ -175,6 +219,8 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 
 	// 특수 키 들..
 	// 스켄 코드가 다른 키와 동일한 특수 키들은 flags또는 vkcode를 비교하여 임의의 scancode 값을 부여해 준다.
+	scancode = 11 * 8 + 3;  m_sKeyName[scancode] = "Win";
+	scancode = 11 * 8 + 5;  m_sKeyName[scancode] = "Super";
 	scancode = 12 * 8 + 0;  m_sKeyName[scancode] = "Ins";
 	scancode = 12 * 8 + 1;  m_sKeyName[scancode] = "Home";
 	scancode = 12 * 8 + 2;  m_sKeyName[scancode] = "Del";
@@ -195,8 +241,12 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 	scancode = 14 * 8 + 3;  m_sKeyName[scancode] = "Down";
 	//------------------------------------------------------
 
+	// Keyboard Hooking Start.
+	HookStart1Click(NULL);
 
 	DrawScanCodeName(0);
+	DrawScanCodeCount();
+
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
@@ -243,7 +293,6 @@ void __fastcall TForm1::HookStart1Click(TObject *Sender)
 
 		try
 		{
-
 			m_bHookStarted = SetHook();
 
 			if(m_bHookStarted) Panel_HookStarted->Color = clLime;
@@ -588,6 +637,12 @@ void __fastcall TForm1::StringGrid_SortDrawCell(TObject *Sender, int ACol, int A
 
 		StringGridSubCodeView(Sender, ACol, ARow, Rect, cBackGround, cFontColor, 8, true, bTextBold);
 	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormResize(TObject *Sender)
+{
+	Caption = "Resize " + Now().FormatString("HH:MM:SS.zzz");
 }
 //---------------------------------------------------------------------------
 
